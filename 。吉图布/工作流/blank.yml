@@ -1,0 +1,180 @@
+#include<stdio.h>
+#include<time.h>
+#include<stdlib.h>
+#include<graphics.h>//C语言图形库
+#pragma comment(lib,"winmm.lib")
+#define row 10//行
+#define line 10//列
+#define num 10//雷数
+#define size 50//图片的大小
+int map[row + 2][line + 2];
+IMAGE img[12];
+int q;
+
+void gteam()//初始化数据
+{
+	int i, j;
+	int n, m;
+	for (i = 0; i < row; ++i)
+	{
+		for (j = 0; j < line; ++j)
+		{
+			map[i][j] = 0;
+		}
+	}
+	srand(time(0));
+	for (i = 1; i <= row; i++)
+	{
+		int a, b;
+		a = rand() % 10 + 1;
+		b = rand() % 10 + 1;
+		if (map[a][b] != -1)
+			map[a][b] = -1;
+	}
+	for (i = 1; i < row + 1; ++i)
+	{
+		for (j = 0; j < line + 1; ++j)
+		{
+			if (map[i][j] != -1)
+			{
+				for (n = i - 1; n <= i+1; ++n)
+				{
+					for (m = j - 1; m <= j +1; ++m)
+					{
+						if (map[n][m] == -1)
+							++map[i][j];
+					}
+				}
+			}
+		}
+	}
+	for (i = 1; i <= row; ++i)
+		for (j = 1; j <= line; ++j)
+		{
+			map[i][j] += 20;
+		}
+
+}
+void pf()//打印
+{
+	int i, j;
+	for (i = 1; i < 1 + row; ++i)
+	{
+		for (j = 1; j < 1 + line; ++j)
+		{
+			printf("%3d", map[i][j]);
+			if (map[i][j] == -1)
+			{
+				putimage((i - 1) * size, (j - 1) * size, &img[9]);
+			}
+			else if (map[i][j] == 0)
+			{
+				putimage((i - 1) * size, (j - 1) * size, &img[0]);
+			}
+			else if (map[i][j] >= 0 && map[i][j] <= 8) {
+				putimage((i - 1) * size, (j - 1) * size, &img[map[i][j]]);
+			}
+			else if (map[i][j] >= 19 && map[i][j] <= 28)
+			{
+				putimage((i - 1)* size, (j - 1)* size, &img[10]);
+			}
+			else if (map[i][j] > 30)
+			{
+				putimage((i - 1) * size, (j - 1) * size, &img[11]);
+			}
+		}
+		printf("\n");
+	}
+}
+void zero( int a, int b)
+{
+	map[a][b] -= 20;
+
+}
+ int game()
+{
+	MOUSEMSG msg = { 0 };
+
+	  int a, b;//获取光标的x坐标和y坐标
+
+	  while (1)
+
+	  {
+		  msg = GetMouseMsg();
+		  switch (msg.uMsg)
+		  {
+		  case (WM_RBUTTONDOWN)://对空白图片操作
+				  a = msg.x / size + 1;
+				  b = msg.y / size + 1;
+				  if (map[a][b] >= 19 && map[a][b] <= 28)
+				  {
+					  map[a][b] += 50;
+				  }
+				  else if (map[a][b] > 30)
+					  map[a][b] -= 50;
+				  return map[a][b];
+				  
+			  break;
+					case(WM_LBUTTONDOWN):
+					  a = msg.x / size +1;
+					  b = msg.y / size +1;
+					  if (map[a][b] >= 19&&map[a][b]<=28)
+					  {
+						  zero(a,b);
+						  
+					  }
+					  return map[a][b];
+			  break;
+
+		  }
+	  }
+	 
+
+
+
+
+}
+
+
+
+ int main()
+{
+
+	int i, j;
+//	HWND hwad = initgraph(size * row, size * line,SHOWCONSOLE);
+	
+	loadimage(&img[0], L"0.jpg", size, size);   
+	loadimage(&img[1], L"1.jpg", size, size);
+	loadimage(&img[2], L"2.jpg", size, size);
+	loadimage(&img[3], L"3.jpg", size, size);
+	loadimage(&img[4], L"4.jpg", size, size);
+	loadimage(&img[5], L"5.jpg", size, size);
+	loadimage(&img[6], L"6.jpg", size, size);
+	loadimage(&img[7], L"7.jpg", size, size);
+	loadimage(&img[8], L"8.jpg", size, size);    //
+	loadimage(&img[9], L"9.jpg", size, size);    //
+	loadimage(&img[10], L"10.jpg", size, size);  //
+	loadimage(&img[11], L"11.jpg", size, size);  //
+
+
+	gteam();
+	pf();
+	
+	
+	
+	while (1)
+	{
+		if (game ()== -1)
+		{
+			pf();
+			MessageBox(hwad, L" 你真是个小可爱",L"",MB_OK);
+		}
+		else if (q == row * line - num)
+		{
+			MessageBox(hwad, L" 你真是个大可爱", L"", MB_OK);
+		}
+	pf();
+	 game();
+	}
+	return 0;
+}
